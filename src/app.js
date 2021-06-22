@@ -21,7 +21,7 @@ function displayMessage(message) {
         <i class="fas fa-user"></i>
         <div>
           <span class="username">${message.username}
-            <time>20:12 PM</time>
+            <time>20:20 PM</time>
           </span>
           <br>
           <span class="message-text">
@@ -33,12 +33,14 @@ function displayMessage(message) {
           <i class="fas fa-pen"></i>
         </div>
       </div>
-  `; 
+  `;
   document.querySelector('#messages').insertAdjacentHTML('beforeend', messageDOM);
   scrolIntoView(document.querySelector('#messages'), {
     scrollMode: 'if-needed',
     block: 'end'
   });
+
+  // <time class="date">$(message.date)            </time>
 
 }
 
@@ -61,22 +63,22 @@ async function displayAllMessages() {
 
 function handleMessage() {
   const message = createMessage();
-  if(message.username && message.message) {
+  if (message.username && message.message) {
     sendMessage(message);
-    // displayMessage(message);
+    displayMessage(message);
   }
 }
 
 // amikor a html teljesen betölt: 
 window.addEventListener('DOMContentLoaded', () => {
-  // displayAllMessages(); 
+  displayAllMessages();
   document.querySelector('#send').addEventListener('click', () => {
     handleMessage();
   });
 });
 
 document.addEventListener('keyup', (event) => {
-  if(event.key === 'Enter') {
+  if (event.key === 'Enter') {
     handleMessage();
   }
 });
