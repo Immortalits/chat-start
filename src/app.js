@@ -43,6 +43,10 @@ function displayMessage(message, id) {
     removeMessage(id);
     deleteMessage(id);
   });
+  // az id-ra hivatkozva kiválasztjuk a 'ceruza' HTML elemet és eventListenert teszünk rá, ami meghívja a displayEditMessage függvényt az id paraméterrel
+  document.querySelector(`[data-id="${id}"] .fa-pen`).addEventListener('click', () => {
+    displayEditMessage(id);
+  });
 
   scrolIntoView(document.querySelector('#messages'), {
     scrollMode: 'if-needed',
@@ -99,6 +103,50 @@ function removeMessage(id) {
 // a az id-ra hivatkozva kiválasztja az adott üzenetet és törli az adatbázisból
 function deleteMessage(id) {
   db.collection('messages').doc(id).delete();
+};
+
+// csinál egy popup ablakot, amiben vagy egy close gomb felül, egy text mező középen és egy save gomb alul
+function displayEditMessage(id) {
+  const markup = /*html*/`
+  <div class="popup-container" id="popup">
+    <div class="edit-message" id="edit-message" data-id="${id}">
+      <div id="close-popup" class="button">
+        Close <i class="fa fa-window-close" aria-hidden="true"></i>
+      </div>
+      <textarea id="edit" name="" cols="30" rows="10">
+      ${document.querySelector(`.message[data-id="${id}"] .message-text`).textContent.trim()
+    }</textarea>
+      <div id="save-message" class="button">
+        Save message<i class="fas fa-save"></i>
+      </div>
+    </div>
+  </div>
+`;
+  // beilleszti az egész popup ablakot
+  document.querySelector('#messages').insertAdjacentHTML('beforeend', markup);
+  // a close gomb kattintásra meghívjuk a closePopup függvényt
+  document.getElementById("close-popup").addEventListener('click', () => closePopup());
+  // definiáluk a textarea változban eltároljuk a szövegdobozt
+  let textarea = document.getElementById("edit");
+  // a save gombra kattintásra meghívjuk a saveMessage és closePopup függvényeket
+  document.getElementById("save-message").addEventListener('click', () => {
+    saveMessage(id, textarea.value);
+    closePopup();
+  });
+};
+
+// a függvény bezárja az edit ablakot
+function closePopup() {
+  document.getElementById("popup").remove();
+};
+
+// módosítjuk az adatbázisban az adott id-re vonatkoző documentum tartalmának message elemét
+async function saveMessage(id, text) {
+  db.collection("messages").doc(id).update({
+    message: text
+  });
+  // módosítjuk az adott üzenetet a UI-ban is
+  document.querySelector(`[data-id="${id}"] .message-text`).textContent = text;
 };
 
 
