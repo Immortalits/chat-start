@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import config from './db_config.js';
 import scrolIntoView from 'scroll-into-view-if-needed';
+import { data } from 'autoprefixer';
 
 
 const firedb = firebase.initializeApp(config);
@@ -15,9 +16,10 @@ async function sendMessage(data) {
   console.log(res);
 }
 
-function displayMessage(message) {
+// a display message az id paraméterrel is dolgozik
+function displayMessage(message, id) {
   const messageDOM = `
-      <div class="message">
+      <div class="message" data-id="${id}">
         <i class="fas fa-user"></i>
         <div>
           <span class="username">${message.username}
@@ -36,11 +38,16 @@ function displayMessage(message) {
       </div>
   `;
   document.querySelector('#messages').insertAdjacentHTML('beforeend', messageDOM);
+  // az id-ra hivatkozva kiválasztjuk a 'kuka' HTML elemet és eventListenert teszünk rá, ami meghívja a remove és deleteMessage függvényeket az id paraméterrel
+  document.querySelector(`[data-id="${id}"] .fa-trash-alt`).addEventListener('click', () => {
+    removeMessage(id);
+    deleteMessage(id);
+  });
+
   scrolIntoView(document.querySelector('#messages'), {
     scrollMode: 'if-needed',
     block: 'end'
   });
-
 
 
 }
@@ -84,13 +91,24 @@ document.addEventListener('keyup', (event) => {
   }
 });
 
+// a az id-ra hivatkozva kiválasztja az adott üzenetet és törli a UI-ból
+function removeMessage(id) {
+  document.querySelector(`[data-id="${id}"]`).remove();
+};
+
+// a az id-ra hivatkozva kiválasztja az adott üzenetet és törli az adatbázisból
+function deleteMessage(id) {
+  db.collection('messages').doc(id).delete();
+};
+
 
 // listen for changes in the database
 db.collection('messages').orderBy('date', 'asc')
   .onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
-        displayMessage(change.doc.data());
+        // kiegészítjük a lekért adatokat az id-val a .id segítségével
+        displayMessage(change.doc.data(), change.doc.id);
       }
       if (change.type === 'modified') {
         console.log('Modified message: ', change.doc.data());
