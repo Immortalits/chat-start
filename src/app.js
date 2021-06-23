@@ -21,7 +21,8 @@ function displayMessage(message) {
         <i class="fas fa-user"></i>
         <div>
           <span class="username">${message.username}
-            <time>20:20 PM</time>
+          <time> ${message.date.toDate().toLocaleString("hu")}
+          </time>
           </span>
           <br>
           <span class="message-text">
@@ -40,7 +41,7 @@ function displayMessage(message) {
     block: 'end'
   });
 
-  // <time class="date">$(message.date)            </time>
+
 
 }
 
@@ -57,7 +58,7 @@ function createMessage() {
 async function displayAllMessages() {
   const query = await db.collection('messages').orderBy('date', 'asc').get();
   query.forEach((doc) => {
-    displayMessage(doc.data());
+    // displayMessage(doc.data());
   });
 }
 
@@ -65,7 +66,7 @@ function handleMessage() {
   const message = createMessage();
   if (message.username && message.message) {
     sendMessage(message);
-    displayMessage(message);
+    // displayMessage(message);
   }
 }
 
